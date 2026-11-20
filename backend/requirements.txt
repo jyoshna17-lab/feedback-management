@@ -4,3 +4,4 @@ PyJWT
 argon2-cffi
 pydantic
 uvicorn
+pytest
