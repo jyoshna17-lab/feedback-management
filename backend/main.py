@@ -12,6 +12,16 @@ app.add_middleware(
 )
 
 
+# Check user authentication (every user can only use their own data)
+def check_user(token):
+    user_id = functions.verify_token(token=token, token_type="access")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid or expired access token")
+    if not functions.user_exists(user_id):
+        raise HTTPException(status_code=401, detail="User not found")
+    return user_id
+
+
 # Check email format, e.g. monica@gmail.com
 def is_valid_email(email):
     if " " in email:                 
@@ -71,3 +81,19 @@ def login(data: LoginRequest):
     if not token:
         raise HTTPException(status_code=401, detail="Invalid email or password")
     return token
+
+
+# A3 - Refresh access token
+@app.post("/refresh")
+def refresh(refresh_token: str = Header(None)):
+    user_id = functions.verify_token(token=refresh_token, token_type="refresh")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
+    return {"access_token": functions.create_token(user_id=user_id, token_type="access")}
+
+
+# E1 - Get my feedback
+@app.get("/feedback")
+def get_feedback(token: str = Header(None)):
+    user_id = check_user(token)
+    return functions.get_feedback(user_id)

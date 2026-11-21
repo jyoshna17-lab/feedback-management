@@ -90,3 +90,41 @@ def create_token(user_id, token_type):
         "exp": datetime.now(timezone.utc) + timedelta(minutes=time)
     }
     return jwt.encode(payload, key=SECRET_KEY, algorithm=ALGORITHM)
+
+
+def verify_token(token, token_type):
+    if token is None:
+        return False
+    try:
+        payload = jwt.decode(jwt=token, key=SECRET_KEY, algorithms=[ALGORITHM])
+    except jwt.PyJWTError:
+        return False
+    if payload["token_type"] == token_type:
+        return payload["user_id"]
+    return False
+
+
+def user_exists(user_id):
+    session = Session(engine)
+    user = session.get(User, user_id)
+    session.close()
+    return user is not None
+
+
+# ---- Feedback ----
+
+def get_feedback(user_id):
+    session = Session(engine)
+    feedbacks = session.query(Feedback).filter(Feedback.user_id == user_id).order_by(Feedback.id.desc()).all()
+    response = []
+    for feedback in feedbacks:
+        temp_feedback = {
+            "id": feedback.id,
+            "subject": feedback.subject,
+            "message": feedback.message,
+            "rating": feedback.rating,
+            "created_at": feedback.created_at.strftime("%d-%m-%Y %H:%M:%S")
+        }
+        response.append(temp_feedback)
+    session.close()
+    return response
