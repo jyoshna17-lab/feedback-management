@@ -24,21 +24,21 @@ def check_user(token):
 
 # Check email format, e.g. monica@gmail.com
 def is_valid_email(email):
-    if " " in email:                 
+    if " " in email:                 # no spaces allowed
         return False
-    if email.count("@") != 1:
+    if email.count("@") != 1:        # must have exactly one @
         return False
 
-    before_at = email.split("@")[0]  
-    after_at = email.split("@")[1]   
+    before_at = email.split("@")[0]  # "monica"
+    after_at = email.split("@")[1]   # "gmail.com"
 
-    if before_at == "":              
+    if before_at == "":              # something must be before @
         return False
-    if "." not in after_at:         
+    if "." not in after_at:          # after @ must have a dot, like gmail.com
         return False
-    if after_at[0] == ".":       
+    if after_at[0] == ".":           # not like monica@.com
         return False
-    if after_at[len(after_at) - 1] == ".":  
+    if after_at[len(after_at) - 1] == ".":   # not like monica@gmail.
         return False
     return True
 
@@ -55,11 +55,13 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
+
 # Model 3: Submit Feedback
 class FeedbackCreate(BaseModel):
     subject: str
     message: str
     rating: int
+
 
 # A1 - Register
 @app.post("/register", status_code=201)
@@ -103,6 +105,7 @@ def refresh(refresh_token: str = Header(None)):
 def get_feedback(token: str = Header(None)):
     user_id = check_user(token)
     return functions.get_feedback(user_id)
+
 
 # E2 - Submit feedback
 @app.post("/feedback", status_code=201)

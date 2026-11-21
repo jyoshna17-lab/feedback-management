@@ -129,6 +129,7 @@ def get_feedback(user_id):
     session.close()
     return response
 
+
 def add_feedback(user_id, subject, message, rating):
     session = Session(engine)
     feedback = Feedback(user_id=user_id, subject=subject, message=message, rating=rating)
@@ -143,5 +144,3 @@ def add_feedback(user_id, subject, message, rating):
     }
     session.close()
     return response
-
-
