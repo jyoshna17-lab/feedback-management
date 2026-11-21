@@ -55,6 +55,12 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
+# Model 3: Submit Feedback
+class FeedbackCreate(BaseModel):
+    subject: str
+    message: str
+    rating: int
+
 # A1 - Register
 @app.post("/register", status_code=201)
 def register_user(data: RegisterRequest):
@@ -97,3 +103,15 @@ def refresh(refresh_token: str = Header(None)):
 def get_feedback(token: str = Header(None)):
     user_id = check_user(token)
     return functions.get_feedback(user_id)
+
+# E2 - Submit feedback
+@app.post("/feedback", status_code=201)
+def add_feedback(data: FeedbackCreate, token: str = Header(None)):
+    user_id = check_user(token)  # user_id comes from the token, never from the request body
+    if data.subject.strip() == "":
+        raise HTTPException(status_code=422, detail="Subject cannot be empty")
+    if data.message.strip() == "":
+        raise HTTPException(status_code=422, detail="Message cannot be empty")
+    if data.rating < 1 or data.rating > 5:
+        raise HTTPException(status_code=422, detail="Rating must be between 1 and 5")
+    return functions.add_feedback(user_id=user_id, subject=data.subject.strip(), message=data.message.strip(), rating=data.rating)

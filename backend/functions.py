@@ -128,3 +128,20 @@ def get_feedback(user_id):
         response.append(temp_feedback)
     session.close()
     return response
+
+def add_feedback(user_id, subject, message, rating):
+    session = Session(engine)
+    feedback = Feedback(user_id=user_id, subject=subject, message=message, rating=rating)
+    session.add(feedback)
+    session.commit()  # commit first so feedback.id is set
+    response = {
+        "id": feedback.id,
+        "subject": feedback.subject,
+        "message": feedback.message,
+        "rating": feedback.rating,
+        "created_at": feedback.created_at.strftime("%d-%m-%Y %H:%M:%S")
+    }
+    session.close()
+    return response
+
+

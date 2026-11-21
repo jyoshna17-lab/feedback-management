@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Routes, Route, useNavigate } from "react-router";
 
+import Register from "./components/Register.jsx";
 import Login from "./components/Login.jsx";
 import Dashboard from "./components/Dashboard.jsx";
+
 
 const API_URL = "http://127.0.0.1:8001";
 
@@ -16,6 +18,33 @@ function App() {
   const [error, setError] = useState("");       // red message
   const navigate = useNavigate();
 
+// A1 - POST /register
+async function register(username, email, password) {
+    setError("");
+    setSuccess("");
+
+    const response = await fetch(API_URL + "/register", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            username: username,
+            email: email,
+            password: password
+        }),
+    });
+
+    const data = await response.json();
+
+    if (response.status !== 201) {
+        setError(data.detail);
+        return;
+    }
+
+    setSuccess("Registered successfully! Please login.");
+    navigate("/login");
+}
 
 // A2 - POST /login
   async function login(email, password) {
@@ -106,10 +135,21 @@ return (
             />
           }
         />
+        <Route
+          path="/register"
+          element={
+            <Register
+            onRegister={register}
+            error={error}
+            success={success}
+    />
+  }
+/>
         <Route path="*" element={<h1>404 Not Found</h1>} />
       </Routes>
     </>
   );
 }
+
 
 export default App;
