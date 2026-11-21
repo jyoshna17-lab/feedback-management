@@ -1,7 +1,5 @@
 fastapi
-sqlalchemy
-PyJWT
-argon2-cffi
-pydantic
 uvicorn
-pytest
+sqlalchemy
+pyjwt
+argon2-cffi

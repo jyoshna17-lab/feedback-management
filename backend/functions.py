@@ -1,33 +1,33 @@
 from sqlalchemy import Integer, String, Column, create_engine, DateTime, ForeignKey
 from sqlalchemy.orm import Session, declarative_base
 from datetime import datetime, timedelta, timezone
+
 import jwt
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 
 ph = PasswordHasher()
 
-DB_PATH = "feedback.db"
-engine = create_engine(f"sqlite:///{DB_PATH}")
+# Database file is kept in /app/data, the folder mounted from EC2 (/opt/feedback/data)
+DB_URL = "sqlite:////app/data/feedback.db"
+engine = create_engine(DB_URL)
 Base = declarative_base()
 
-ACCESS_TOKEN_EXPIRY = 15
-REFRESH_TOKEN_EXPIRY = 7 * 24 * 60
+ACCESS_TOKEN_EXPIRY = 15  # mins
+REFRESH_TOKEN_EXPIRY = 7 * 24 * 60  # mins
 SECRET_KEY = "SECRET123"
 ALGORITHM = "HS256"
 
 
-# User Table
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
     username = Column(String)
-    email = Column(String, unique=True)
-    password = Column(String)
+    email = Column(String)
+    hashed_password = Column(String)
     created_at = Column(DateTime, default=datetime.now)
 
 
-# Feedback Table
 class Feedback(Base):
     __tablename__ = "feedback"
     id = Column(Integer, primary_key=True)
@@ -36,14 +36,57 @@ class Feedback(Base):
     message = Column(String)
     rating = Column(Integer)
     created_at = Column(DateTime, default=datetime.now)
+
+
 Base.metadata.create_all(engine)
 
-def create_token(user_id, email, token_type):
+
+# ---- Users ----
+
+def register_user(username, email, password):
+    session = Session(engine)
+    if session.query(User).filter_by(email=email).first() is not None:
+        session.close()
+        return None
+    user = User(username=username, email=email, hashed_password=ph.hash(password))
+    session.add(user)
+    session.commit()  # commit first so user.id is set
+    response = {
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "created_at": user.created_at.strftime("%d-%m-%Y %H:%M:%S")
+    }
+    session.close()
+    return response
+
+
+# ---- Authentication ----
+
+def verify_login(email, password):
+    session = Session(engine)
+    user = session.query(User).filter_by(email=email).first()
+    session.close()
+    if user is None:
+        return False
+    try:
+        ph.verify(user.hashed_password, password)
+    except VerifyMismatchError:
+        return False
+    return {
+        "access_token": create_token(user_id=user.id, token_type="access"),
+        "refresh_token": create_token(user_id=user.id, token_type="refresh"),
+        "username": user.username
+    }
+
+
+def create_token(user_id, token_type):
     time = ACCESS_TOKEN_EXPIRY
     if token_type == "refresh":
         time = REFRESH_TOKEN_EXPIRY
-    payload = {"user_id": user_id,"email": email,"token_type": token_type,"exp": datetime.now(timezone.utc) + timedelta(minutes=time)}
-    token = jwt.encode(payload=payload,key=SECRET_KEY,algorithm=ALGORITHM)
-    return token
-
-
+    payload = {
+        "user_id": user_id,
+        "token_type": token_type,
+        "exp": datetime.now(timezone.utc) + timedelta(minutes=time)
+    }
+    return jwt.encode(payload, key=SECRET_KEY, algorithm=ALGORITHM)
