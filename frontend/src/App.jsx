@@ -8,7 +8,7 @@ import Dashboard from "./components/Dashboard.jsx";
 const API_URL = "http://127.0.0.1:8001";
 
 
-// ---------- App: keeps the tokens and calls the API ----------
+// App: keeps the tokens and calls the API 
 function App() {
   const [accessToken, setAccessToken] = useState("");
   const [refreshToken, setRefreshToken] = useState("");

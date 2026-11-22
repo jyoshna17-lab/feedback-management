@@ -24,21 +24,21 @@ def check_user(token):
 
 # Check email format, e.g. monica@gmail.com
 def is_valid_email(email):
-    if " " in email:                 # no spaces allowed
+    if " " in email:                 
         return False
-    if email.count("@") != 1:        # must have exactly one @
+    if email.count("@") != 1:        
         return False
 
-    before_at = email.split("@")[0]  # "monica"
-    after_at = email.split("@")[1]   # "gmail.com"
+    before_at = email.split("@")[0]  
+    after_at = email.split("@")[1]   
 
-    if before_at == "":              # something must be before @
+    if before_at == "":              
         return False
-    if "." not in after_at:          # after @ must have a dot, like gmail.com
+    if "." not in after_at:          
         return False
-    if after_at[0] == ".":           # not like monica@.com
+    if after_at[0] == ".":           
         return False
-    if after_at[len(after_at) - 1] == ".":   # not like monica@gmail.
+    if after_at[len(after_at) - 1] == ".":   
         return False
     return True
 

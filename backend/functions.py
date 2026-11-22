@@ -41,7 +41,7 @@ class Feedback(Base):
 Base.metadata.create_all(engine)
 
 
-# ---- Users ----
+#Users 
 
 def register_user(username, email, password):
     session = Session(engine)
@@ -61,7 +61,7 @@ def register_user(username, email, password):
     return response
 
 
-# ---- Authentication ----
+# Authentication 
 
 def verify_login(email, password):
     session = Session(engine)
@@ -111,7 +111,7 @@ def user_exists(user_id):
     return user is not None
 
 
-# ---- Feedback ----
+#Feedback 
 
 def get_feedback(user_id):
     session = Session(engine)
