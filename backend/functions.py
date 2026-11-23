@@ -1,6 +1,7 @@
 from sqlalchemy import Integer, String, Column, create_engine, DateTime, ForeignKey
 from sqlalchemy.orm import Session, declarative_base
 from datetime import datetime, timedelta, timezone
+import os
 
 import jwt
 from argon2 import PasswordHasher
@@ -15,7 +16,7 @@ Base = declarative_base()
 
 ACCESS_TOKEN_EXPIRY = 15  # mins
 REFRESH_TOKEN_EXPIRY = 7 * 24 * 60  # mins
-SECRET_KEY = "SECRET123"
+SECRET_KEY = os.getenv("SECRET_KEY")  # not written in the code, comes from GitHub Secrets (SECRET_KEY)
 ALGORITHM = "HS256"
 
 

@@ -110,8 +110,11 @@ cd backend
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
+$env:SECRET_KEY = "any-key-for-your-laptop"
 uvicorn main:app --reload --port 8001
 ```
+
+The JWT secret key is not written in the code. On the laptop we give any key using `$env:SECRET_KEY` before starting. On EC2 it comes from the GitHub secret `SECRET_KEY`.
 
 Open http://127.0.0.1:8001/docs to test the APIs.
 
@@ -137,8 +140,8 @@ New feedback can be submitted from http://127.0.0.1:8001/docs using POST /feedba
 ## Docker
 
 ```
-docker build -t feedback-api ./backend
-docker run -d -p 8001:8001 -v ${PWD}/data:/app/data feedback-api
+docker build -t feedback-api -f backend/dockerfile ./backend
+docker run -d -p 8001:8001 -v ${PWD}/data:/app/data -e SECRET_KEY=any-key-for-your-laptop feedback-api
 ```
 
 ## Deployment
@@ -164,7 +167,7 @@ If the database is only inside the container, it gets deleted when the old conta
 
 So even after a new deployment, the old users and feedback are still there. We tested this by adding feedback, pushing a new change and checking that the feedback was still there after the deployment.
 
-Docker Hub and EC2 details are saved in GitHub Secrets (DOCKERHUB_USERNAME, DOCKERHUB_TOKEN, EC2_HOST, EC2_USER, EC2_SSH_KEY), not in the code.
+Docker Hub details, EC2 details and the JWT secret key are saved in GitHub Secrets (DOCKERHUB_USERNAME, DOCKERHUB_TOKEN, EC2_HOST, EC2_USER, EC2_SSH_KEY, SECRET_KEY), not in the code.
 
 ## Our contributions
 
