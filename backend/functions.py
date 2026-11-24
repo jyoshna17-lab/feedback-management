@@ -1,7 +1,7 @@
 from sqlalchemy import Integer, String, Column, create_engine, DateTime, ForeignKey
 from sqlalchemy.orm import Session, declarative_base
 from datetime import datetime, timedelta, timezone
-import os
+
 
 import jwt
 from argon2 import PasswordHasher
